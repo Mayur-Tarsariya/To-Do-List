@@ -12,16 +12,15 @@ const updateLocalStorage = (tasks) => {
 // Function to retrieve tasks from local storage
 const getTasksFromLocalStorage = () => {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    tasks.forEach(task => {
+    tasks.forEach((task) => {
         renderTask(task.name, task.completed);
     });
 };
 
-
 // Function to render a task in the UI
 const renderTask = (taskName, completed) => {
-    const task = `<div class="task ${completed ? 'completed' : ''}">
-        <input type="checkbox" class="task-check" ${completed ? 'checked' : ''}>
+    const task = `<div class="task ${completed ? "completed" : ""}">
+        <input type="checkbox" class="task-check" ${completed ? "checked" : ""}>
         <span class="taskname">${taskName}</span>
         <button class="edit"><i class="fa-solid fa-pen-to-square"></i></button>
         <button class="delete"><i class="fa-solid fa-trash"></i></button>
@@ -35,7 +34,7 @@ const addNewTask = (taskName) => {
 
     // Check if the task already exists (case insensitive)
     let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    if (tasks.some(task => task.name.toLowerCase() === lowerCaseTaskName)) {
+    if (tasks.some((task) => task.name.toLowerCase() === lowerCaseTaskName)) {
         error.innerText = "Task already exists!";
         error.style.display = "block";
         return;
@@ -68,43 +67,58 @@ addBtn.addEventListener("click", () => {
 // Add event listener for edit, delete, and checkbox functionalities within the task container
 taskContainer.addEventListener("click", (e) => {
     const target = e.target;
+    const taskElement = target.closest(".task");
+
+    if (!taskElement) return; // Return if clicked outside of task container
+
+    const taskNameElement = taskElement.querySelector(".taskname");
+    const taskName = taskNameElement.innerText.toLowerCase();
+    const isChecked = taskElement.querySelector(".task-check").checked;
+
     if (target.classList.contains("delete")) {
-        const taskElement = target.closest(".task");
-        const taskName = taskElement.querySelector(".taskname").innerText.toLowerCase();
-
         // Remove from UI
         taskElement.remove();
 
         // Remove from local storage
         let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-        tasks = tasks.filter(task => task.name.toLowerCase() !== taskName);
+        tasks = tasks.filter((task) => task.name.toLowerCase() !== taskName);
         updateLocalStorage(tasks);
-
-
     } else if (target.classList.contains("edit")) {
-        const taskElement = target.closest(".task");
-        const taskName = taskElement.querySelector(".taskname").innerText.toLowerCase();
+        // Check if task is completed before allowing edit
+        if (!isChecked) {
+            // Update input with task for editing
+            newTaskInput.value = taskName;
 
-        // Update input with task for editing
-        newTaskInput.value = taskName;
+            // Remove from UI
+            taskElement.remove();
 
-        // Remove from UI
-        taskElement.remove();
-
-        // Remove from local storage
-        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-        tasks = tasks.filter(task => task.name.toLowerCase() !== taskName);
-        updateLocalStorage(tasks);
-
-
+            // Remove from local storage
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks = tasks.filter((task) => task.name.toLowerCase() !== taskName);
+            updateLocalStorage(tasks);
+        } else {
+            let timeoutId;
+            function startTimeout() {
+                timeoutId = setTimeout(() => {
+                    error.innerText = "Can't edit a completed task";
+                    error.style.display = "block";
+                }, 100);
+            }
+            function stopTimeout() {
+                clearTimeout(timeoutId);
+            }
+            startTimeout();
+            setTimeout(() => {
+                stopTimeout();
+                error.style.display = "none";
+            }, 2000);
+        }
     } else if (target.classList.contains("task-check")) {
-        const taskElement = target.closest(".task");
-        const taskName = taskElement.querySelector(".taskname").innerText.toLowerCase();
-        const isChecked = target.checked;
-
         // Update local storage with completed status
         let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-        const index = tasks.findIndex(task => task.name.toLowerCase() === taskName);
+        const index = tasks.findIndex(
+            (task) => task.name.toLowerCase() === taskName
+        );
         if (index !== -1) {
             tasks[index].completed = isChecked;
             updateLocalStorage(tasks);
