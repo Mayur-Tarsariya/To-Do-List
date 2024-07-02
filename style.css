@@ -8,8 +8,7 @@
 }
 
 body {
-    height: 100vh;
-    /* background: linear-gradient(#ffd55c 50%, #5a95ff 50%); */
+    min-height: 100vh;
     background-image: linear-gradient(to top right, #64e3ff, #ffaf9f);
 }
 
