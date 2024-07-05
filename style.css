@@ -22,6 +22,8 @@ body {
     top: 2.875em;
 
     & .container {
+          height: 80vh;
+        overflow-y: scroll;
         padding: 2em 2.5em;
         background-color: #f1f8fb;
         box-shadow: 0 1em 2em rgba(0, 0, 0, 0.3);
